@@ -49,38 +49,44 @@ def compare_strategies_auto(trials=100, spins=100, bankroll=500, starting_bet=1)
         ("Fibonacci", fibonacci)
     ]
     
-    cumulative_results = {name: [0]*spins for name, _ in strategies}
+    # To store final bankrolls per trial
+    trial_results = {name: [] for name, _ in strategies}
 
     for trial in range(trials):
         for name, strategy in strategies:
-            _, history = strategy(Roulette(), bankroll, starting_bet, spins)  # <- this line is key
-            while len(history) < spins:
-                history.append(history[-1])  # Repeat the last bankroll value
+            _, history = strategy(Roulette(), bankroll, starting_bet, spins)
+            trial_results[name].append(history[-1])  # Final bankroll after `spins`
 
-            cumulative_results[name] = [cumulative_results[name][i] + history[i] for i in range(spins)]
+    # Compute averages after every 5 trials
+    averaged_results = {name: [] for name in trial_results}
+    trial_points = list(range(5, trials + 1, 5))  # [5, 10, ..., 100]
 
-    average_results = {name: [value / trials for value in cumulative_results[name]] for name in cumulative_results}
+    for name in trial_results:
+        for i in trial_points:
+            avg = sum(trial_results[name][:i]) / i
+            averaged_results[name].append(avg)
 
     # Save to CSV
-    with open('strategy_comparison.csv', 'w', newline='') as f:
+    with open('strategy_comparison_by_trial.csv', 'w', newline='') as f:
         writer = csv.writer(f)
-        header = ['Spin'] + [name for name, _ in strategies]
+        header = ['Trial'] + [name for name, _ in strategies]
         writer.writerow(header)
-        for i in range(spins):
-            row = [i+1] + [average_results[name][i] for name, _ in strategies]
+        for i, trial in enumerate(trial_points):
+            row = [trial] + [averaged_results[name][i] for name, _ in strategies]
             writer.writerow(row)
 
     # Plot the graph
-    for name in average_results:
-        plt.plot(range(1, spins+1), average_results[name], label=name)
-    
-    plt.title("Strategy Comparison Over Spins")
-    plt.xlabel("Number of Spins")
-    plt.ylabel("Average Balance")
+    for name in averaged_results:
+        plt.plot(trial_points, averaged_results[name], label=name)
+
+    plt.title("Strategy Comparison Over Trials")
+    plt.xlabel("Number of Trials")
+    plt.ylabel("Average Final Balance")
     plt.legend()
     plt.grid(True)
-    plt.savefig("strategy_comparison.png")
+    plt.savefig("strategy_comparison_by_trial.png")
     plt.clf()
+
 
 
 
