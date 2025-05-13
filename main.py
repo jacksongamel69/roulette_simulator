@@ -16,13 +16,13 @@ from analysis import analyze_results
 
 def display_menu():
     """Display the strategy options and get user selection."""
-    print("🎰 Roulette Strategy Simulator 🎰\n")
+    print("🎰 Jackson's Roulette Strategy Simulator 🎰\n")
     print("Choose a strategy:")
-    print("1. Martingale          - Double after each loss")
-    print("2. Flat Betting        - Same bet every time")
-    print("3. Reverse Martingale  - Double after each win")
-    print("4. D'Alembert          - Increase 1 after loss, decrease 1 after win")
-    print("5. Fibonacci           - Use Fibonacci sequence on losses")
+    print("1. Martingale          - Double initial bet amount after each loss")
+    print("2. Flat Betting        - Same bet amount every time, win or lose.")
+    print("3. Reverse Martingale  - Double initial bet size after each win")
+    print("4. D'Alembert          - Increase bet by initial bet amount after loss, decrease bet size after win")
+    print("5. Fibonacci           - Use Fibonacci sequence on losses: Increase your bet by adding the previous two bet amounts after each loss, and if you win, you move back two places in the sequence")
     print("6. Compare Strategies  - Compare all strategies with 1,000 spins")
     print("7. Exit                - Exit the program")
     choice = input("\nEnter the number of your strategy: ")
@@ -170,9 +170,7 @@ def main():
 
             print(f"\nRunning {strategy.__name__.replace('_', ' ').title()} Strategy...\n")
 
-            # Run the simulation based on the selected strategy
-            history = strategy(Roulette(), bankroll, starting_bet, spins)
-            final_balance = history[-1]
+            final_balance, history = strategy(Roulette(), bankroll, starting_bet, spins)
             print(f"Final balance: ${final_balance:.2f}")
             print(f"Bets history: {history}")
 
